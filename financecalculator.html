@@ -1,0 +1,269 @@
+<HTML>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<HEAD>
+<script>
+function cal_rate() {
+	n = parseFloat(document.forms[0].number.value);
+	pmt = parseFloat(document.forms[0].pmt.value);
+	pv = parseFloat(document.forms[0].pv.value);
+	fv = parseFloat(document.forms[0].fv.value);
+	ioy = parseInt(document.forms[0].ioy.value);
+	
+	var iteration_max = 1000;
+	var iteration = 0;
+	var adjustment = 0.5;
+	var solver = 0;
+	var sum_all = 0;
+	var findTheAnswer = false;
+	var inverse = false;
+	
+	if(pv > 0 && fv < 0) {
+		inverse = true;
+	} else if(pv > 0 && fv > 0) {
+		alert('Either PV or FV should be negative');
+		return;
+	} else if(pv < 0 && fv < 0) {
+		alert('Either PV or FV should be positive');
+		return;
+	}
+	
+	while(iteration < iteration_max) {
+	    sum_all = 0;
+	    rate = solver + 1;
+	    
+	    for(i=1;i<=n;i++) {
+	        sum_all = sum_all + pmt / Math.pow(rate,i);
+	    }
+	    
+	    sum_all = sum_all + pv;
+	    sum_all = sum_all + fv/Math.pow(rate,n);
+	    
+	    //console.log(sum_all);
+	    
+	    if(Math.abs(sum_all) < 0.000001) {
+	        //I got it!
+	        findTheAnswer = true;
+	        break;
+	    } else if(sum_all > 0) {
+	        //discountmore.
+	        if(inverse == false) solver = solver + adjustment;
+	        else solver = solver - adjustment;
+	        //To-do: I need to take into account reverse case.
+	        
+	    } else { 
+	        //subtract discount.
+	        if(inverse == false) solver = solver - adjustment;
+	        else solver = solver + adjustment;
+	    }
+		adjustment = adjustment / 1.5;
+	    iteration = iteration + 1;
+	}
+	if(findTheAnswer == true) {
+	
+	    rate = rate -1;
+	    rate = rate * 100000;
+	    rate = Math.round(rate);
+	    rate = rate / 100000;
+	    rate = rate * ioy;
+	    document.forms[0].rate.value = rate;
+	} else {
+	    alert('Unable to find YTM!');
+	} 
+    
+}
+function cal_fv() {
+	n = parseFloat(document.forms[0].number.value);
+	pmt = parseFloat(document.forms[0].pmt.value);
+	pv = parseFloat(document.forms[0].pv.value);
+	rate = parseFloat(document.forms[0].rate.value);
+	ioy = parseInt(document.forms[0].ioy.value);
+	
+	rate = rate / ioy;
+	
+	rate = rate + 1;
+	sum_all = 0;
+	sum_all = sum_all + pv * Math.pow(rate,n);
+	
+	for(i=1;i<=n;i++) {
+		sum_all = sum_all + pmt * Math.pow(rate,i);
+	}
+	
+	document.forms[0].fv.value = sum_all;
+	
+}
+function cal_pmt() {
+    //Annuity
+    
+	n = parseFloat(document.forms[0].number.value);
+	pv = parseFloat(document.forms[0].pv.value);
+	rate = parseFloat(document.forms[0].rate.value);
+	fv = parseFloat(document.forms[0].fv.value);
+	ioy = parseInt(document.forms[0].ioy.value);
+	
+	rate = rate / ioy;
+	
+	rate = rate + 1;
+	
+	total = pv + fv;
+	
+	total = total / ((1 - Math.pow(rate, -n))/(rate-1))
+    direction = pv / pv;
+    total = - direction * total;
+    	
+	document.forms[0].pmt.value = total;
+}
+function cal_pv() {
+	n = parseFloat(document.forms[0].number.value);
+	pv = parseFloat(document.forms[0].pv.value);
+	rate = parseFloat(document.forms[0].rate.value);
+	fv = parseFloat(document.forms[0].fv.value);
+	pmt = parseFloat(document.forms[0].pmt.value);
+	ioy = parseInt(document.forms[0].ioy.value);
+	
+	rate = rate / ioy;
+	
+    sum_all = 0;
+    rate = rate + 1;
+    
+    for(i=1;i<=n;i++) {
+        sum_all = sum_all + (pmt / Math.pow(rate,i));
+    }
+    sum_all = sum_all + (fv / Math.pow(rate,n));
+    sum_all = -sum_all;
+    
+    document.forms[0].pv.value = sum_all;
+}
+function showhelp(obj) {
+    if(obj.value == 'Show Help') {
+        document.getElementById("help_table").style.display = "";
+        obj.value = 'Hide Help';
+    } else {
+        document.getElementById("help_table").style.display = "none";
+        obj.value = 'Show Help';
+
+    }
+}
+
+</script>
+<STYLE>
+.inputbox {
+    width: 100px;
+    border: 1px solid #CCC;
+    height: 30px;
+    font-size: 12pt;
+}
+</STYLE>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-57854391-1', 'auto');
+  ga('send', 'pageview');
+</script></head>
+<BODY>
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- responsive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-7620137999744720"
+     data-ad-slot="5778750897"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<BR>
+<BR>
+<Script src="menu.js"></Script>
+
+<BR>
+<Table width="300"><TR><TD>
+<Center>Finance Calculator</Center><BR>
+<Center>(Mobile Supported)</Center><BR>
+</TD></TR></Table>
+<form name="calc">
+<Table border="0" cellpadding="1" cellspacing="2" bgcolor="black" width="300">
+<TR>
+<TD bgcolor="#FFFFFF">N(Period)</TD>
+<TD bgcolor="#FFFFFF"><input type="text" name="number" value="10" class="inputbox"></TD>
+</TR>
+<TR>
+<TD bgcolor="#FFFFFF">PMT</TD>
+<TD bgcolor="#FFFFFF"><input type="text" name="pmt" value="50" class="inputbox"><Input type="button" value="calculate PMT" onclick="cal_pmt()"></TD>
+</TR>
+<TR>
+<TD bgcolor="#FFFFFF">PV</TD>
+<TD bgcolor="#FFFFFF"><input type="text" name="pv" value="-950" class="inputbox"><Input type="button" value="calculate PV" onclick="cal_pv()"></TD>
+</TR>
+<TR>
+<TD bgcolor="#FFFFFF">FV</TD>
+<TD bgcolor="#FFFFFF"><input type="text" name="fv" value="1000" class="inputbox">
+<Input type="button" value="calculate FV" onclick="cal_fv()"></TD>
+</TR>
+<TR>
+<TD bgcolor="#FFFFFF">RATE</TD>
+<TD bgcolor="#FFFFFF"><input type="text" name="rate" value="0.05" class="inputbox"><Input type="button" value="calculate YTM" onclick="cal_rate()"></TD>
+</TR>
+<TR>
+<TD bgcolor="#FFFFFF">IoY</TD>
+<TD bgcolor="#FFFFFF"><input type="text" name="ioy" value="2" class="inputbox"></TD>
+</TR>
+</TABLE>
+</form><BR>
+<BR>
+<input type="button" name="help" value="Show Help" onclick="showhelp(this);">
+<TABLE width="300" id="help_table" style="display:none;">
+<TR>
+<TD>
+How to use it and example.<BR>
+<BR>
+<B>1. Getting YTM</B><BR>
+<BR>
+The bond's face value is $100<BR>
+The bond is sold at $95<BR>
+The coupon rate is 5%, semiannual. for 10 yrs.<BR>
+Get the YTM on this bond.<BR>
+<BR>
+IoY = 2 (Semiannual) <BR>
+FV = 100<BR>
+PV = -95 (Should be negative)<BR>
+PMT = 2.5<BR>
+N = 20 (Semiannual * 10 yrs)<BR>
+Click "calculate YTM" button<BR>
+<BR>
+<B>2. Getting Mortgage Value</B><BR>
+<BR>
+Supposed that the house value is $1000<BR>
+You need to pay the mortgage monthly<BR>
+The APR rate is 12%, compounding monthly<BR>
+It's 10 years contract<BR>
+Get the monthly payment on this mortgage contract<BR>
+<BR>
+IoY = 12 (Monthly) <BR>
+FV = 0<BR>
+PV = 1000<BR>
+N = 120 (monthly * 10 yrs)<BR>
+RATE = 0.12<BR>
+<BR>
+Click "calculate pmt" button<BR>
+<BR>
+<B>3. Getting Present Value of the bond</B><BR>
+<BR>
+The bond's face value is $100<BR>
+The coupon rate is 5%, semi-annual, for 10 yrs.<BR>
+The discount rate is 7%.<BR>
+Get the value on this bond<BR>
+<BR>
+IoY = 2 (Semiannual) <BR>
+FV = 100<BR>
+PMT = 2.5<BR>
+N = 20 (Semiannual * 10 yrs)<BR>
+RATE=0.07<BR>
+Click "calculate PV" button<BR>
+</TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>
+

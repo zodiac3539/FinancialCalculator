@@ -1,0 +1,334 @@
+<HTML>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<Head>
+<Script>
+function doit() {
+    input_num = document.calc.input_num.value;
+    output_num = infixToPostfixRe(input_num);
+        
+    document.calc.output_num.value = output_num;
+    
+}
+Array.prototype.peek = function () {
+  return this[this.length - 1];
+};
+
+function infixToPostfixRe(reStr) {
+
+  var output = [];
+  var stack = [];
+  var op = [];
+  var str = '';
+  var numinthis = true;
+
+  var previousaction = '';
+  for (var k = 0, length = reStr.length; k < length;  k++) {
+
+    // current char
+    var c = reStr[k];
+
+    if (c == '(') {
+    
+    	stack.push(c);
+    	//if(reStr[k+1]=='-') {
+    	//    str = str + '-';
+    	//    reStr[k+1] = '0';
+    	//}
+    
+    } else if (c == ')') {
+	
+		if(str != '') {
+			output.push(str);
+			str = '';
+			numinthis = false;
+    	}
+    
+      	while (stack.peek() != '(') {
+        	output.push(stack.pop());
+      	}
+    
+      	stack.pop();
+
+    } else if (c == ' ') {
+         if(str != '') {
+             output.push(str);
+             str = '';
+             numinthis = false;
+         }
+ 
+    } else {
+        if(c == '1' ||
+    		  c == '2' ||
+    		  c == '3' ||
+    		  c == '4' ||
+    		  c == '5' ||
+    		  c == '6' ||
+    		  c == '7' ||
+    		  c == '8' ||
+    		  c == '9' ||
+    		  c == '0' ||
+    		  c == '.') {
+    		
+    		  
+    		//if(c == '–') c = '-';
+         	str = str + c;
+          	numinthis = true;
+          	if(k==length-1) {
+            	  output.push(str);
+         	}
+      } else if(c == 'e') {
+          tmp = Math.exp(1);
+          output.push(tmp);
+          numinthis = true;
+      } else {
+          if(str != '') {
+              output.push(str);
+              str = '';
+          }
+          numinthis = false;
+      }
+      //–
+	  if(numinthis == false) {
+		while (stack.length) {
+    		var peekedChar = stack.peek();
+
+        	var peekedCharPrecedence = precedenceOf(peekedChar);
+        	var currentCharPrecedence = precedenceOf(c);
+
+        	if (peekedCharPrecedence >= currentCharPrecedence) {
+          		output.push(stack.pop());
+        	} else {
+          		break;
+        	}
+        }
+      	stack.push(c);
+     }
+
+  	}
+  } // end for loop
+
+  while (stack.length)
+    output.push(stack.pop());
+
+  while (output.length)
+      op.push(output.pop());
+  var result = op.join(" ");
+  console.log(result);
+  //!dontPrint && console.log(reStr, "=>", result);
+
+    var result_stack = [];	
+    var result = 0;
+    var op1,op2 = 0;
+    var temp_result = 0;
+    
+    if(op.length == 1) {
+        tmp = op.pop();
+        return parseFloat(tmp);
+    }
+    
+    while(op.length) {        
+        tmp = op.pop();
+        op1 = 0;
+        op2 = 0;
+        
+		if(tmp == '+' ||
+
+		   tmp == '*' ||
+		   tmp == '/' ||
+		   tmp == '^') {
+		    op1 = parseFloat(result_stack.pop());
+		    op2 = parseFloat(result_stack.pop());
+		    operator = tmp;
+		} else if(tmp == '-') {
+		    if(result_stack.length > 1) {
+		    	op1 = parseFloat(result_stack.pop());
+		    	op2 = parseFloat(result_stack.pop());
+		    	operator = tmp;
+		    } else {
+		        op2 = 0;
+		        op1 = parseFloat(result_stack.pop());
+		    	operator = tmp;
+		    }
+		} else {
+		    operator = '|';
+		    result_stack.push(tmp);
+		}
+		  
+        if(operator == '+') {
+            temp_result = op1 + op2;
+            result_stack.push(temp_result);
+        } else if(operator == '-') {
+        	temp_result = op2 - op1;
+            result_stack.push(temp_result);
+        } else if(operator == '*') {
+			temp_result = op1 * op2;
+			result_stack.push(temp_result);
+        } else if(operator == '/') {
+			temp_result = op2 / op1;
+			result_stack.push(temp_result);
+        } else if(operator == '^') {
+			temp_result = Math.pow(op2,op1);
+			result_stack.push(temp_result);
+        } else if(operator == '|') {
+            //result_stack.push(temp_result);
+        } else {
+            //alert('Invalid operator:'+operator);
+            //return;
+        }
+       
+        if(op.length == 0) {
+            result = temp_result;
+            break;
+        }
+    }
+
+  return result;
+}
+
+// precedence
+
+var precedenceMap = {
+  '(': 1,
+  '-': 2, 
+  '+': 2, 
+  '/': 3, 
+  '*': 3, 
+  '^': 4
+  // else 5
+
+};
+
+function precedenceOf(c) {
+  return precedenceMap[c] || 5;
+}
+
+function addthat(obj) {
+    document.calc.input_num.value = document.calc.input_num.value + obj.value;
+}
+function clears() {
+	document.calc.input_num.value = '';
+}
+function del() {
+    txt = document.calc.input_num.value;
+    if(txt.length > 0) {
+        txt = txt.substring(0, txt.length-1);
+    }
+    document.calc.input_num.value = txt;
+}
+function clickx() {
+	document.calc.input_num.value = document.calc.input_num.value
+	 + document.calc.xvalue.value;
+}
+function outputx() {
+	 document.calc.xvalue.value=document.calc.output_num.value;
+}
+function calculatelog() {
+    input_num = document.calc.input_num.value;
+    output_num = infixToPostfixRe(input_num);
+        
+    document.calc.output_num.value = Math.log(output_num);
+}
+// tests
+
+</script>
+<STYLE>
+.inputbox {
+    width: 290px;
+    border: 1px solid #CCC;
+    height: 30px;
+    font-size: 12pt;
+}
+.outputbox {
+    width: 200px;
+    border: 1px solid #CCC;
+    height: 30px;
+    font-size: 12pt;
+}
+
+.buttonbox {
+    width: 50px;
+    border: 1px solid #CCC;
+    background-color: #FFFFFF;
+    height: 45px;
+    font-size: 12pt;
+}
+.btn2 {
+    width: 80px;
+    border: 1px solid #CCC;
+    background-color: #FFFFFF;
+    height: 30px;
+    font-size: 10pt;
+}     
+</STYLE>
+</Head>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-57854391-1', 'auto');
+  ga('send', 'pageview');
+</script></head>
+<BODY>
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- responsive -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-7620137999744720"
+     data-ad-slot="5778750897"
+     data-ad-format="auto"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<BR>
+<Script src="menu.js"></Script>
+
+<form name="calc">
+Input<BR>
+<Input type="text" name="input_num" class="inputbox"><BR>
+Output<BR>
+<Input type="text" name="output_num" class="outputbox">&nbsp;<Input type="Button" value="Output->V" onclick="outputx()" class="btn2"><BR>
+V<BR>
+<Input type="text" name="xvalue" value="0" class="outputbox"><BR>
+
+</form>
+&nbsp;&nbsp;&nbsp;
+<Input type="Button" Value="C" onclick="clears()" class="buttonbox">
+<Input type="Button" Value="Del" onclick="del()" class="buttonbox">
+<Input type="Button" Value="V" onclick="clickx()" class="buttonbox">
+<Input type="Button" Value="ln" onclick="calculatelog()" class="buttonbox">
+<BR>
+&nbsp;&nbsp;&nbsp;
+<Input type="Button" Value="1" onclick="addthat(this)" class="buttonbox">
+<Input type="Button" Value="2" onclick="addthat(this)" class="buttonbox">
+<Input type="Button" Value="3" onclick="addthat(this)" class="buttonbox">
+<Input type="Button" Value="+" onclick="addthat(this)" class="buttonbox">
+<Input type="Button" Value="-" onclick="addthat(this)" class="buttonbox">
+<BR>
+&nbsp;&nbsp;&nbsp;
+<Input type="Button" Value="4" onclick="addthat(this)" class="buttonbox">
+<Input type="Button" Value="5" onclick="addthat(this)" class="buttonbox">
+<Input type="Button" Value="6" onclick="addthat(this)" class="buttonbox">
+<Input type="Button" Value="*" onclick="addthat(this)" class="buttonbox">
+<Input type="Button" Value="/" onclick="addthat(this)" class="buttonbox">
+<BR>
+&nbsp;&nbsp;&nbsp;
+<Input type="Button" Value="7" onclick="addthat(this)" class="buttonbox">
+<Input type="Button" Value="8" onclick="addthat(this)" class="buttonbox">
+<Input type="Button" Value="9" onclick="addthat(this)" class="buttonbox">
+<Input type="Button" Value="(" onclick="addthat(this)" class="buttonbox">
+<Input type="Button" Value=")" onclick="addthat(this)" class="buttonbox">
+<BR>
+&nbsp;&nbsp;&nbsp;
+<Input type="Button" Value="." onclick="addthat(this)" class="buttonbox">
+<Input type="Button" Value="0" onclick="addthat(this)" class="buttonbox">
+<Input type="Button" Value="=" onclick="doit()" class="buttonbox">
+<Input type="Button" Value="e" onclick="addthat(this)" class="buttonbox">
+<Input type="Button" Value="^" onclick="addthat(this)" class="buttonbox">
+<BR>
+<BR>
+
+<BR>
+</BODY>
+</HTML>
